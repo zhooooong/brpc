@@ -139,6 +139,7 @@ TEST_BUTIL_SOURCES = [
     #"popen_unittest.cpp",
     "bounded_queue_unittest.cc",
     "butil_unittest_main.cpp",
+    "scope_guard_unittest.cc",
 ] + select({
     "@bazel_tools//tools/osx:darwin_x86_64": [],
     "//conditions:default": [
@@ -226,6 +227,8 @@ cc_test(
             # glog CHECK die with a fatal error
             "bthread_key_unittest.cpp",
             "bthread_butex_multi_tag_unittest.cpp",
+            "bthread_rwlock_unittest.cpp",
+            "bthread_semaphore_unittest.cpp",
         ],
     ),
     copts = COPTS,

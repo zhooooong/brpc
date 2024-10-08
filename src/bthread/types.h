@@ -88,6 +88,7 @@ typedef struct {
     pthread_rwlock_t rwlock;
     void* list;
     void* free_keytables;
+    size_t size;
     int destroyed;
 } bthread_keytable_pool_t;
 
@@ -172,9 +173,11 @@ typedef struct bthread_mutex_t {
 #endif
     unsigned* butex;
     bthread_contention_site_t csite;
+    bool enable_csite;
 } bthread_mutex_t;
 
 typedef struct {
+    bool enable_csite;
 } bthread_mutexattr_t;
 
 typedef struct bthread_cond_t {
@@ -189,7 +192,28 @@ typedef struct bthread_cond_t {
 typedef struct {
 } bthread_condattr_t;
 
-typedef struct {
+typedef struct bthread_sem_t {
+#if defined(__cplusplus)
+    bthread_sem_t() : butex(NULL), enable_csite(true) {}
+    DISALLOW_COPY_AND_ASSIGN(bthread_sem_t);
+#endif
+    unsigned* butex;
+    bool enable_csite;
+} bthread_sem_t;
+
+typedef struct bthread_rwlock_t {
+#if defined(__cplusplus)
+    bthread_rwlock_t()
+        : reader_count(0), reader_wait(0), wlock_flag(false), writer_csite{} {}
+    DISALLOW_COPY_AND_ASSIGN(bthread_rwlock_t);
+#endif
+    bthread_sem_t reader_sema; // Semaphore for readers to wait for completing writers.
+    bthread_sem_t writer_sema; // Semaphore for writers to wait for completing readers.
+    int reader_count; // Number of pending readers.
+    int reader_wait; // Number of departing readers.
+    bool wlock_flag; // Flag used to indicate that a write lock has been held.
+    bthread_mutex_t write_queue_mutex; // Held if there are pending writers.
+    bthread_contention_site_t writer_csite;
 } bthread_rwlock_t;
 
 typedef struct {
